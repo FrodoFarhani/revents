@@ -9,6 +9,7 @@ import UserDetailedPage from '../../features/User/UserDetailed/UserDetailedPage'
 import PeopleDashboard from '../../features/User/PeopelDashboard/PeopleDashboard';
 import EventDetailedPage from '../../features/event/EventDetailed/EventDetailedPage';
 import HomePage from '../../features/Home/HomePage';
+import TestComponent from '../../features/testArea/TestComponent';
 class App extends Component {
   /* 
          path / is seperate because we do not want to this page to have navbar
@@ -35,6 +36,7 @@ class App extends Component {
                   <Route path='/profile/:id' component={UserDetailedPage} />
                   <Route path='/settings' component={SettingsDashboard} />
                   <Route path='/createEvent' component={EventForm} />
+                  <Route path='/test' component={TestComponent} />
                 </Switch>
               </Container>
             </div>
