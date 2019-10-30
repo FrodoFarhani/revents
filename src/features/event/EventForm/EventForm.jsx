@@ -1,29 +1,61 @@
 import React, { Component } from 'react';
 import { Segment, Form, Button } from 'semantic-ui-react';
+import cuid from 'cuid';
+import { createEvent, updateEvent } from '../eventActions';
 
-const emptyEvent = {
+import { connect } from 'react-redux';
+//after adding redux
+/* const emptyEvent = {
   title: '',
   date: '',
   city: '',
   venue: '',
   hostedBy: ''
+}; */
+
+const mapStateToProps = (state, ownProps) => {
+  const eventId = ownProps.match.params.id;
+  let event = {
+    title: '',
+    date: '',
+    city: '',
+    venue: '',
+    hostedBy: ''
+  };
+  if (eventId && state.events.length > 0) {
+    event = state.events.filter(event => event.id === eventId)[0];
+  }
+  return {
+    event
+  };
+};
+
+const actions = {
+  createEvent,
+  updateEvent
 };
 class EventForm extends Component {
-  componentDidMount() {
+  state = {
+    event: Object.assign({}, this.props.event)
+  };
+
+  // commented after using redux
+  /* componentDidMount() {
     if (this.props.selectedEvent !== null) {
       this.setState({
         event: this.props.selectedEvent
       });
     }
-  }
+  } */
 
-  componentWillReceiveProps(nextProps) {
+  // commented after using redux
+  /*   componentWillReceiveProps(nextProps) {
     if (this.props.selectedEvent !== nextProps.selectedEvent) {
       this.setState({
         event: nextProps.selectedEvent || emptyEvent
       });
     }
-  }
+  } */
 
   /*
    this is an example to how to use refs
@@ -35,13 +67,19 @@ class EventForm extends Component {
     evn.preventDefault();
     if (this.state.event.id) {
       this.props.updateEvent(this.state.event);
+      this.props.history.goBack();
     } else {
-      this.props.createEvent(this.state.event);
+      //after adding redux and importing actions for creating actions we found there is no id and image
+      //so we need to add these here
+      const newEvent = {
+        ...this.state.event,
+        id: cuid(),
+        hostPhotoURL: '/assets/user.png'
+      };
+      this.props.createEvent(newEvent);
+      //after creating event we should redirect user to eventList page
+      this.props.history.push('/events');
     }
-  };
-
-  state = {
-    event: emptyEvent
   };
 
   onInputChange = evt => {
@@ -55,7 +93,7 @@ class EventForm extends Component {
 
   render() {
     const { event } = this.state;
-    const { handleCancel } = this.props;
+    //const { handleCancel } = this.props;
     return (
       <Segment>
         <Form onSubmit={this.onFormSubmit}>
@@ -109,7 +147,10 @@ class EventForm extends Component {
           <Button positive type='submit'>
             Submit
           </Button>
-          <Button onClick={handleCancel} type='button'>
+          {/*  <Button onClick={handleCancel} type='button'>
+            Cancel
+          </Button> */}
+          <Button onClick={this.props.history.goBack} type='button'>
             Cancel
           </Button>
         </Form>
@@ -118,4 +159,7 @@ class EventForm extends Component {
   }
 }
 
-export default EventForm;
+export default connect(
+  mapStateToProps,
+  actions
+)(EventForm);
