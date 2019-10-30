@@ -1,9 +1,15 @@
 import React, { Component } from 'react';
-import { Segment, Form, Button } from 'semantic-ui-react';
+import { Segment, Form, Button, Grid, Header } from 'semantic-ui-react';
 import cuid from 'cuid';
 import { createEvent, updateEvent } from '../eventActions';
 
 import { connect } from 'react-redux';
+
+import { reduxForm, Field } from 'redux-form';
+
+import TextInput from '../../../app/common/form/TextInput';
+import TextArea from '../../../app/common/form/TextArea';
+import SelectInput from '../../../app/common/form/SelectInput';
 //after adding redux
 /* const emptyEvent = {
   title: '',
@@ -15,18 +21,14 @@ import { connect } from 'react-redux';
 
 const mapStateToProps = (state, ownProps) => {
   const eventId = ownProps.match.params.id;
-  let event = {
-    title: '',
-    date: '',
-    city: '',
-    venue: '',
-    hostedBy: ''
-  };
+  let event = {};
   if (eventId && state.events.length > 0) {
     event = state.events.filter(event => event.id === eventId)[0];
   }
   return {
-    event
+    initialValues: event
+    //redux form can get initialValues. we will pass it inside our map state func because those initial
+    // values it takes as props. this will help us to load data from props when we click manage event.
   };
 };
 
@@ -34,10 +36,19 @@ const actions = {
   createEvent,
   updateEvent
 };
+
+const category = [
+  { key: 'drinks', text: 'Drinks', value: 'drinks' },
+  { key: 'culture', text: 'Culture', value: 'culture' },
+  { key: 'film', text: 'Film', value: 'film' },
+  { key: 'food', text: 'Food', value: 'food' },
+  { key: 'music', text: 'Music', value: 'music' },
+  { key: 'travel', text: 'Travel', value: 'travel' }
+];
 class EventForm extends Component {
-  state = {
+  /*  state = {
     event: Object.assign({}, this.props.event)
-  };
+  }; */
 
   // commented after using redux
   /* componentDidMount() {
@@ -63,7 +74,7 @@ class EventForm extends Component {
     evn.preventDefault();
     console.log(this.refs.title.value);
   }; */
-  onFormSubmit = evn => {
+  /* onFormSubmit = evn => {
     evn.preventDefault();
     if (this.state.event.id) {
       this.props.updateEvent(this.state.event);
@@ -80,34 +91,103 @@ class EventForm extends Component {
       //after creating event we should redirect user to eventList page
       this.props.history.push('/events');
     }
+  }; */
+
+  //After adding redux form
+  onFormSubmit = values => {
+    if (this.props.initialValues.id) {
+      this.props.updateEvent(values);
+      this.props.history.goBack();
+    } else {
+      //after adding redux and importing actions for creating actions we found there is no id and image
+      //so we need to add these here
+      const newEvent = {
+        ...values,
+        id: cuid(),
+        hostPhotoURL: '/assets/user.png',
+        hostedBy: 'Bob'
+      };
+      this.props.createEvent(newEvent);
+      //after creating event we should redirect user to eventList page
+      this.props.history.push('/events');
+    }
   };
 
-  onInputChange = evt => {
+  /* onInputChange = evt => {
     const NewEvent = this.state.event;
     NewEvent[evt.target.name] = evt.target.value;
 
     this.setState({
       event: NewEvent
     });
-  };
+  }; */
 
   render() {
-    const { event } = this.state;
+    //const { event } = this.state;
     //const { handleCancel } = this.props;
     return (
-      <Segment>
-        <Form onSubmit={this.onFormSubmit}>
-          <Form.Field>
+      <Grid>
+        <Grid.Column width={10}>
+          <Segment>
+            <Header sub color='teal' content='Event Details' />
+            {/*  <Form onSubmit={this.onFormSubmit}> */}
+            {/* we use redux form handle submit to submit our form */}
+            <Form onSubmit={this.props.handleSubmit(this.onFormSubmit)}>
+              {/*  <Form.Field>
             <label>Event Title</label>
-            {/* <input ref='title' placeholder='Event title' /> */}
+            {// <input ref='title' placeholder='Event title' /> }
             <input
               name='title'
               onChange={this.onInputChange}
               value={event.title}
               placeholder='Event title'
             />
-          </Form.Field>
-          <Form.Field>
+          </Form.Field> */}
+              {/* we just remove sementicUI field and add redux form field that has more features for us */}
+              {/** if you chaekc it in redux extention in browser you will see it in state tab. by clicking this title textbox
+           you can see events fired like focuse or chanching */}
+
+              <Field
+                name='title'
+                type='text'
+                component={TextInput}
+                placeholder='Give your event a name'
+              />
+              <Field
+                name='category'
+                type='text'
+                component={SelectInput}
+                options={category}
+                placeholder='What is your event about'
+                multiple={false}
+              />
+              <Field
+                name='description'
+                rows={3}
+                type='text'
+                component={TextArea}
+                placeholder='Tell us about your event'
+              />
+              <Header sub color='teal' content='Event Location Details' />
+              <Field
+                name='city'
+                type='text'
+                component={TextInput}
+                placeholder='Event city'
+              />
+              <Field
+                name='venue'
+                type='text'
+                component={TextInput}
+                placeholder='Event venue'
+              />
+              <Field
+                name='date'
+                type='text'
+                component={TextInput}
+                placeholder='Event date'
+              />
+              {/* <Form.Field>
             <label>Event Date</label>
             <input
               name='date'
@@ -143,18 +223,20 @@ class EventForm extends Component {
               value={event.hostedBy}
               placeholder='Enter the name of person hosting'
             />
-          </Form.Field>
-          <Button positive type='submit'>
-            Submit
-          </Button>
-          {/*  <Button onClick={handleCancel} type='button'>
+          </Form.Field> */}
+              <Button positive type='submit'>
+                Submit
+              </Button>
+              {/*  <Button onClick={handleCancel} type='button'>
             Cancel
           </Button> */}
-          <Button onClick={this.props.history.goBack} type='button'>
-            Cancel
-          </Button>
-        </Form>
-      </Segment>
+              <Button onClick={this.props.history.goBack} type='button'>
+                Cancel
+              </Button>
+            </Form>
+          </Segment>
+        </Grid.Column>
+      </Grid>
     );
   }
 }
@@ -162,4 +244,9 @@ class EventForm extends Component {
 export default connect(
   mapStateToProps,
   actions
-)(EventForm);
+)(reduxForm({ form: 'eventForm', enableReinitialize: true })(EventForm));
+// enableReinitialize : this would enable our form initialize when the props change
+/**
+ * by adding reduxForm to our eventForm page, if you look it into browser there are
+ * alot of props added to this form
+ */
