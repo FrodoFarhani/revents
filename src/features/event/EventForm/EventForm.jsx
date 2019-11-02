@@ -10,6 +10,14 @@ import { reduxForm, Field } from 'redux-form';
 import TextInput from '../../../app/common/form/TextInput';
 import TextArea from '../../../app/common/form/TextArea';
 import SelectInput from '../../../app/common/form/SelectInput';
+import {
+  composeValidators,
+  combineValidators,
+  isRequired,
+  hasLengthGreaterThan
+} from 'revalidate';
+import DateInput from '../../../app/common/form/DateInput';
+import moment from 'moment';
 //after adding redux
 /* const emptyEvent = {
   title: '',
@@ -45,6 +53,19 @@ const category = [
   { key: 'music', text: 'Music', value: 'music' },
   { key: 'travel', text: 'Travel', value: 'travel' }
 ];
+
+const validate = combineValidators({
+  title: isRequired({ message: 'Event is required' }),
+  category: isRequired({ message: 'Category is required' }),
+  description: composeValidators(
+    isRequired({ message: 'Description is required' }),
+    hasLengthGreaterThan(4)({ message: 'HSould be at least 5 character' })
+  )(),
+  city: isRequired({ message: 'City is required' }),
+  venue: isRequired({ message: 'Venue is required' }),
+  date: isRequired('Date is require')
+});
+
 class EventForm extends Component {
   /*  state = {
     event: Object.assign({}, this.props.event)
@@ -95,6 +116,12 @@ class EventForm extends Component {
 
   //After adding redux form
   onFormSubmit = values => {
+    /**
+     * Objects are not valid as a React child, because of this error we should bring moment package here
+     * and format our date which comes from our date picker
+     */
+    values.date = moment(values.date).format();
+
     if (this.props.initialValues.id) {
       this.props.updateEvent(values);
       this.props.history.goBack();
@@ -125,6 +152,10 @@ class EventForm extends Component {
   render() {
     //const { event } = this.state;
     //const { handleCancel } = this.props;
+    const { invalid, submiting, pristine } = this.props;
+    /** Pristine: if sombody wants to update aform and make no changes then the initial
+     * values that we provide is the pristine version of the form
+     */
     return (
       <Grid>
         <Grid.Column width={10}>
@@ -184,8 +215,11 @@ class EventForm extends Component {
               <Field
                 name='date'
                 type='text'
-                component={TextInput}
-                placeholder='Event date'
+                component={DateInput}
+                dateFormat='YYYY-MM-DD HH:mm'
+                timeFormat='HH:mm'
+                showTimeSelect
+                placeholder='Event date and time'
               />
               {/* <Form.Field>
             <label>Event Date</label>
@@ -224,7 +258,11 @@ class EventForm extends Component {
               placeholder='Enter the name of person hosting'
             />
           </Form.Field> */}
-              <Button positive type='submit'>
+              <Button
+                disabled={invalid || submiting || pristine}
+                positive
+                type='submit'
+              >
                 Submit
               </Button>
               {/*  <Button onClick={handleCancel} type='button'>
@@ -244,7 +282,11 @@ class EventForm extends Component {
 export default connect(
   mapStateToProps,
   actions
-)(reduxForm({ form: 'eventForm', enableReinitialize: true })(EventForm));
+)(
+  reduxForm({ form: 'eventForm', enableReinitialize: true, validate })(
+    EventForm
+  )
+);
 // enableReinitialize : this would enable our form initialize when the props change
 /**
  * by adding reduxForm to our eventForm page, if you look it into browser there are
