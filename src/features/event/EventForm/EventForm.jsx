@@ -1,3 +1,5 @@
+/* global google */
+/** THERE would be an error if we do not use above code when we use google ....!!!!! */
 import React, { Component } from 'react';
 import { Segment, Form, Button, Grid, Header } from 'semantic-ui-react';
 import cuid from 'cuid';
@@ -18,6 +20,10 @@ import {
 } from 'revalidate';
 import DateInput from '../../../app/common/form/DateInput';
 import moment from 'moment';
+
+import PlaceInput from '../../../app/common/form/PlaceInput';
+import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
+import Script from 'react-load-script';
 //after adding redux
 /* const emptyEvent = {
   title: '',
@@ -114,6 +120,43 @@ class EventForm extends Component {
     }
   }; */
 
+  state = {
+    cityLatLng: {},
+    venueLatLng: {},
+    scriptLoaded: false
+  };
+
+  handleCitySelect = selectedCity => {
+    geocodeByAddress(selectedCity)
+      .then(results => getLatLng(results[0]))
+      .then(latlng => {
+        this.setState({
+          cityLatLng: latlng
+        });
+      })
+      .then(() => {
+        /** change is a redux form option to change a particular field,this would take effect when we have sth
+         * in our selectedCity...
+         * we add this because mouse was not working on cities drop down when we over write it here.
+         */
+        this.props.change('city', selectedCity);
+      });
+  };
+  handleVenueSelect = selectedVenue => {
+    geocodeByAddress(selectedVenue)
+      .then(results => getLatLng(results[0]))
+      .then(latlng => {
+        this.setState({
+          venueLatLng: latlng
+        });
+      })
+      .then(() => {
+        this.props.change('venue', selectedVenue);
+      });
+  };
+  handleScriptLoad = () => {
+    this.setState({ scriptLoaded: true });
+  };
   //After adding redux form
   onFormSubmit = values => {
     /**
@@ -121,6 +164,8 @@ class EventForm extends Component {
      * and format our date which comes from our date picker
      */
     values.date = moment(values.date).format();
+
+    values.venueLatLng = this.state.venueLatLng;
 
     if (this.props.initialValues.id) {
       this.props.updateEvent(values);
@@ -158,6 +203,10 @@ class EventForm extends Component {
      */
     return (
       <Grid>
+        <Script
+          url='https://maps.googleapis.com/maps/api/js?key=AIzaSyDn6mwVKAIRNfNOQwZ24k-OimkRzDTC_Iw&libraries=places'
+          onLoad={this.handleScriptLoad}
+        />
         <Grid.Column width={10}>
           <Segment>
             <Header sub color='teal' content='Event Details' />
@@ -203,15 +252,25 @@ class EventForm extends Component {
               <Field
                 name='city'
                 type='text'
-                component={TextInput}
+                component={PlaceInput}
+                options={{ types: ['(cities)'] }}
                 placeholder='Event city'
+                onSelect={this.handleCitySelect}
               />
-              <Field
-                name='venue'
-                type='text'
-                component={TextInput}
-                placeholder='Event venue'
-              />
+              {this.state.scriptLoaded && (
+                <Field
+                  name='venue'
+                  type='text'
+                  component={PlaceInput}
+                  options={{
+                    location: new google.maps.LatLng(this.state.cityLatLng),
+                    radius: 1000,
+                    types: ['establishment']
+                  }}
+                  placeholder='Event venue'
+                  onSelect={this.handleVenueSelect}
+                />
+              )}
               <Field
                 name='date'
                 type='text'
