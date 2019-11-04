@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { increamentCounter, decreamentCounter } from './testActions';
+import { increamentAsync, decreamentAsync } from './testActions';
 import {
   Button
   // ,Icon
@@ -19,12 +19,13 @@ import { openModal } from '../modals/modalActions';
 const mapStateToProps = (state, ownProps) => ({
   //test matches the name that we use in rootReducer
   // data is in our test reducer the initialState for data is 42
-  data: state.test.data
+  data: state.test.data,
+  loading: state.test.loading
 });
 
 const actions = {
-  increamentCounter,
-  decreamentCounter,
+  increamentAsync,
+  decreamentAsync,
   openModal
 };
 
@@ -59,10 +60,11 @@ class TestComponent extends Component {
       onChange: this.onChange
     };
     const {
-      increamentCounter,
-      decreamentCounter,
+      increamentAsync,
+      decreamentAsync,
       data,
-      openModal
+      openModal,
+      loading
     } = this.props;
     return (
       <div>
@@ -73,11 +75,17 @@ class TestComponent extends Component {
         <h1>Test Area</h1>
         <h3>The answer is :{data}</h3>
         <Button
-          onClick={increamentCounter}
+          loading={loading}
+          onClick={increamentAsync}
           color='green'
           content='Increament'
         />
-        <Button onClick={decreamentCounter} color='red' content='Decreament' />
+        <Button
+          loading={loading}
+          onClick={decreamentAsync}
+          color='red'
+          content='Decreament'
+        />
         <Button
           onClick={() => openModal('TestModal', { data: 43 })}
           color='teal'

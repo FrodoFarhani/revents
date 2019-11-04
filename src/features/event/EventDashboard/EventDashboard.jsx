@@ -6,11 +6,13 @@ import EventList from '../EventList/EventList';
 
 import { connect } from 'react-redux';
 import { deleteEvent } from '../eventActions';
+import LoadingComponent from '../../../app/layout/loadingComponent';
 
 const actions = { deleteEvent };
 const mapStateToProps = (state, ownProps) => {
   return {
-    events: state.events
+    events: state.events,
+    loading: state.async.loading
   };
 };
 
@@ -90,7 +92,8 @@ class EventDashboard extends Component {
   }; */
   render() {
     //const { selectedEvent } = this.state;
-    const { events } = this.props;
+    const { events, loading } = this.props;
+    if (loading) return <LoadingComponent inverted={true} />;
     return (
       <Grid>
         <Grid.Column width={10}>
