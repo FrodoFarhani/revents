@@ -144,8 +144,13 @@ class EventForm extends Component {
   };
   handleVenueSelect = selectedVenue => {
     geocodeByAddress(selectedVenue)
-      .then(results => getLatLng(results[0]))
+      .then(results => {
+        console.log(results);
+        getLatLng(results[0]);
+      })
       .then(latlng => {
+        console.log(latlng);
+
         this.setState({
           venueLatLng: latlng
         });

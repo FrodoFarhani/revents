@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { increamentCounter, decreamentCounter } from './testActions';
-import { Button, Icon } from 'semantic-ui-react';
+import {
+  Button
+  // ,Icon
+} from 'semantic-ui-react';
 
 import Script from 'react-load-script';
 import PlacesAutocomplete, {
@@ -9,7 +12,9 @@ import PlacesAutocomplete, {
   getLatLng
 } from 'react-places-autocomplete';
 
-import GoogleMapReact from 'google-map-react';
+//import GoogleMapReact from 'google-map-react';
+
+import { openModal } from '../modals/modalActions';
 
 const mapStateToProps = (state, ownProps) => ({
   //test matches the name that we use in rootReducer
@@ -19,10 +24,11 @@ const mapStateToProps = (state, ownProps) => ({
 
 const actions = {
   increamentCounter,
-  decreamentCounter
+  decreamentCounter,
+  openModal
 };
 
-const Marker = () => <Icon name='marker' size='big' color='red' />;
+//const Marker = () => <Icon name='marker' size='big' color='red' />;
 class TestComponent extends Component {
   state = {
     address: '',
@@ -52,7 +58,12 @@ class TestComponent extends Component {
       value: this.state.address,
       onChange: this.onChange
     };
-    const { increamentCounter, decreamentCounter, data } = this.props;
+    const {
+      increamentCounter,
+      decreamentCounter,
+      data,
+      openModal
+    } = this.props;
     return (
       <div>
         <Script
@@ -67,6 +78,11 @@ class TestComponent extends Component {
           content='Increament'
         />
         <Button onClick={decreamentCounter} color='red' content='Decreament' />
+        <Button
+          onClick={() => openModal('TestModal', { data: 43 })}
+          color='teal'
+          content='Open Modal'
+        />
         <br />
         <br />
         <form onSubmit={this.handleFormSubmit}>
@@ -75,7 +91,7 @@ class TestComponent extends Component {
           )}
           <button type='submit'>Submit</button>
         </form>
-        <div style={{ height: '300px', width: '100%' }}>
+        {/* <div style={{ height: '300px', width: '100%' }}>
           <GoogleMapReact
             bootstrapURLKeys={{
               key: 'AIzaSyDn6mwVKAIRNfNOQwZ24k-OimkRzDTC_Iw'
@@ -85,7 +101,7 @@ class TestComponent extends Component {
           >
             <Marker lat={59.955413} lng={30.337844} text='My Marker' />
           </GoogleMapReact>
-        </div>
+        </div> */}
       </div>
     );
   }

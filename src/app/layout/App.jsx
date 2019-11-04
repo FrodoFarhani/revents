@@ -10,6 +10,7 @@ import PeopleDashboard from '../../features/User/PeopelDashboard/PeopleDashboard
 import EventDetailedPage from '../../features/event/EventDetailed/EventDetailedPage';
 import HomePage from '../../features/Home/HomePage';
 import TestComponent from '../../features/testArea/TestComponent';
+import ModalManager from '../../features/modals/ModalManager';
 class App extends Component {
   /* 
          path / is seperate because we do not want to this page to have navbar
@@ -20,6 +21,7 @@ class App extends Component {
   render() {
     return (
       <div>
+        <ModalManager />
         <Switch>
           <Route exact path='/' component={HomePage} />
         </Switch>

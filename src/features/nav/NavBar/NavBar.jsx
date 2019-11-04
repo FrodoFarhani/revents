@@ -4,22 +4,40 @@ import { NavLink, Link, withRouter } from 'react-router-dom';
 import SignedOutMenu from '../Menus/SignedOutMenu';
 import SignedInMenue from '../Menus/SignedInMenue';
 
+import { connect } from 'react-redux';
+import { openModal } from '../../modals/modalActions';
+import { logout } from '../../auth/authActions';
 /**
  *  withRouter is a function that takes a component and returns a new component
  */
-class NavBar extends Component {
-  state = {
-    authenticated: false
+const actions = {
+  openModal,
+  logout
+};
+
+const mapStateToProps = (state, ownProps) => {
+  return {
+    auth: state.auth
   };
+};
+class NavBar extends Component {
+  /*  state = {
+    authenticated: false
+  }; */
   handleSignIn = () => {
-    this.setState({
-      authenticated: true
-    });
+    // this.setState({
+    //   authenticated: true
+    // });
+    this.props.openModal('LoginModal');
+  };
+  handleRegister = () => {
+    this.props.openModal('RegisterModal');
   };
   handleSignOut = () => {
-    this.setState({
+    this.props.logout();
+    /*  this.setState({
       authenticated: false
-    });
+    }); */
     /**
      * if we use this without withRouter we would get error, because NavBar does not have
      * any Routing props, so we use withRouter to give this component routing pwoer and props
@@ -27,7 +45,8 @@ class NavBar extends Component {
     this.props.history.push('/');
   };
   render() {
-    const { authenticated } = this.state;
+    const { auth } = this.props;
+    const authenticated = auth.authenticated;
     return (
       <Menu inverted fixed='top'>
         <Container>
@@ -53,9 +72,15 @@ class NavBar extends Component {
             </Menu.Item>
           )}
           {authenticated ? (
-            <SignedInMenue signOut={this.handleSignOut} />
+            <SignedInMenue
+              currentUser={auth.currentUser}
+              signOut={this.handleSignOut}
+            />
           ) : (
-            <SignedOutMenu signIn={this.handleSignIn} />
+            <SignedOutMenu
+              signIn={this.handleSignIn}
+              register={this.handleRegister}
+            />
           )}
         </Container>
       </Menu>
@@ -68,4 +93,9 @@ class NavBar extends Component {
  * The important concept is these functions would take a component (like NavBar) as a parameter and after executation
  * they will return that component with extra features.
  */
-export default withRouter(NavBar);
+export default withRouter(
+  connect(
+    mapStateToProps,
+    actions
+  )(NavBar)
+);
